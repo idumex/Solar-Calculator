@@ -32,7 +32,9 @@ export default function InteractiveDiagram({ result, selectedCity, systemVoltage
     singleBatteryAh,
     recommendedInverterKva,
     totalDailyWh,
-    totalContinuousWatts
+    totalContinuousWatts,
+    batteryTotalKwhNeeded,
+    recommendedBatteryUnitLabel
   } = result;
 
   return (
@@ -157,13 +159,14 @@ export default function InteractiveDiagram({ result, selectedCity, systemVoltage
               <Battery className="h-6 w-6 animate-pulse" />
             </div>
             <div>
-              <h4 className="text-sm font-semibold text-slate-100">Battery Storage Banks</h4>
+              <h4 className="text-sm font-semibold text-slate-100">Battery Storage Banks ({batteryTotalKwhNeeded.toFixed(1)} kWh)</h4>
               <p className="text-xs text-slate-400 mt-1">
-                {batteryBankCount > 0 ? (
+                {batteryTotalKwhNeeded > 0 ? (
                   <>
-                    <strong className="text-emerald-400 font-semibold">{batteryBankCount}x {singleBatteryAh}Ah</strong> standard 12V modules config.
-                    <span className="block text-[11px] text-slate-500 font-mono mt-0.5">
-                      Wired as: {seriesCount} in series (yielding {systemVoltage}V) x {parallelCount} parallel branch(es).
+                    <strong className="text-emerald-400 font-semibold block mb-0.5">{recommendedBatteryUnitLabel}</strong>
+                    <span className="block text-[11px] text-slate-500 font-mono leading-normal">
+                      Sized for selected environment profile. 
+                      {batteryBankCount > 0 && ` Direct current equivalent: ${seriesCount} series × ${parallelCount} parallel (${batteryBankCount}x ${singleBatteryAh}Ah blocks).`}
                     </span>
                   </>
                 ) : (

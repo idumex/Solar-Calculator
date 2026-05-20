@@ -158,6 +158,42 @@ export function calculateSolarSystem(
   // Total daily 12V Equivalent capacity (for comparison dashboard metrics)
   const totalBatteryAh12VEquivalent = nominalBatteryAhNeeded * (settings.systemVoltage / 12);
 
+  // Calculate gross nameplate energy storage (gross kWh capacity needed)
+  const batteryTotalKwhNeeded = totalDailyWh > 0
+    ? (nominalBatteryAhNeeded * settings.systemVoltage) / 1000
+    : 0;
+
+  // Calculate recommended standard unit configurations
+  let recommendedBatteryUnitCount = 0;
+  let recommendedBatteryUnitSizeKwh = 0;
+  let recommendedBatteryUnitLabel = '';
+
+  if (totalDailyWh > 0) {
+    if (settings.batteryChemistry === 'lithium') {
+      // Pick standard Lithium pack size based on gross storage needed
+      if (batteryTotalKwhNeeded <= 3.5) {
+        recommendedBatteryUnitSizeKwh = 2.56; // Standard 2.56 kWh
+      } else if (batteryTotalKwhNeeded <= 15.0) {
+        recommendedBatteryUnitSizeKwh = 5.12; // Standard 5.12 kWh LFP Wall (48V 100Ah) - extremely common
+      } else if (batteryTotalKwhNeeded <= 45.0) {
+        recommendedBatteryUnitSizeKwh = 10.24; // Standard 10.24 kWh LFP Pack
+      } else {
+        recommendedBatteryUnitSizeKwh = 25.0; // High capacity 25.0 kWh industrial unit
+      }
+
+      recommendedBatteryUnitCount = Math.max(1, Math.ceil(batteryTotalKwhNeeded / recommendedBatteryUnitSizeKwh));
+      recommendedBatteryUnitLabel = `${recommendedBatteryUnitCount} unit${recommendedBatteryUnitCount > 1 ? 's' : ''} of ${recommendedBatteryUnitSizeKwh} kWh Lithium Battery`;
+    } else {
+      // For Gel/Lead-Acid batteries, they are rated in Ah at 12V (e.g., standard 12V 200Ah deep cycle is 2.4 kWh per battery)
+      recommendedBatteryUnitSizeKwh = (singleBatteryAh * 12) / 1000; // 1.2 kWh or 2.4 kWh
+      recommendedBatteryUnitCount = batteryBankCount;
+      const typeLabel = settings.batteryChemistry === 'gel' ? 'Gel Deep Cycle' : 'Lead-Acid';
+      recommendedBatteryUnitLabel = `${recommendedBatteryUnitCount} unit${recommendedBatteryUnitCount > 1 ? 's' : ''} of ${recommendedBatteryUnitSizeKwh.toFixed(1)} kWh (12V ${singleBatteryAh}Ah) ${typeLabel} Battery`;
+    }
+  } else {
+    recommendedBatteryUnitLabel = 'No storage battery required';
+  }
+
   // 5. Charge Controller (MPPT) sizing
   // Under typical MPPT sizing, Output Current = Solar Array Watts / System Battery Voltage * safety margin (1.25)
   const controllerAmps = actualArrayWatts > 0
@@ -358,6 +394,10 @@ export function calculateSolarSystem(
     singleBatteryVoltage,
     seriesCount,
     parallelCount,
+    batteryTotalKwhNeeded,
+    recommendedBatteryUnitCount,
+    recommendedBatteryUnitSizeKwh,
+    recommendedBatteryUnitLabel,
     controllerAmps,
     panelToInverterCable,
     inverterToBatteryCable,

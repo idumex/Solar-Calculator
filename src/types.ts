@@ -30,7 +30,7 @@ export interface CalculatorSettings {
   selectedCityName: string;
   batteryChemistry: BatteryChemistry;
   systemVoltage: 12 | 24 | 48; // Volts
-  panelSizeWatts: number; // Standard panel sizes like 350W, 400W, 450W, 550W
+  panelSizeWatts: number; // Standard panel sizes like 350W, 400W, 450W, 550W, 600W, 625W, 650W, 700W, 750W
   autonomyDays: number; // Days the battery can run the load without sun
   batteryDepthOfDischarge: number; // e.g., 0.8 for Lithium, 0.5 for Gel
   cableLengthMeters: number; // Distance from panel to inverter / battery
@@ -66,6 +66,10 @@ export interface SizingResult {
   singleBatteryVoltage: number; // Voltage per battery block
   seriesCount: number;
   parallelCount: number;
+  batteryTotalKwhNeeded: number; // Gross nameplate kWh capacity needed
+  recommendedBatteryUnitCount: number; // Number of recommended standard battery units (e.g. 4)
+  recommendedBatteryUnitSizeKwh: number; // Rating of recommended standard battery units (e.g. 5.12 kWh)
+  recommendedBatteryUnitLabel: string; // Friendly text of recommended storage, e.g. "4 units of 5.12 kWh Lithium LFP Battery"
 
   // Charge controller
   controllerAmps: number; // Recommended charge controller size (MPPT)

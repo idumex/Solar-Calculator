@@ -34,7 +34,8 @@ import {
   Gauge,
   MapPin,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  MessageSquare
 } from 'lucide-react';
 
 import { CityInfo, LoadItem, CalculatorSettings, BatteryChemistry } from './types';
@@ -43,6 +44,7 @@ import { STANDARD_APPLIANCES } from './data/appliances';
 import { calculateSolarSystem } from './utils/solarCalculator';
 import NigeriaMapWidget from './components/NigeriaMapWidget';
 import InteractiveDiagram from './components/InteractiveDiagram';
+import ContactPage from './components/ContactPage';
 
 // Dynamic helper to map standard preset icons safely to JSX elements
 function renderApplianceIcon(iconName: string, className = "h-4 w-4") {
@@ -68,6 +70,9 @@ function renderApplianceIcon(iconName: string, className = "h-4 w-4") {
 }
 
 export default function App() {
+  // Navigation tab routing state
+  const [activeTab, setActiveTab] = useState<'calculator' | 'contact'>('calculator');
+
   // 1. Hardcoded initial interactive load estimates for an out-of-the-box working state
   const [loads, setLoads] = useState<LoadItem[]>([
     { id: '1', name: 'LED Light Bulbs (Living/Exterior)', watts: 12, quantity: 6, hoursPerDay: 8, surgeFactor: 1.0 },
@@ -228,7 +233,7 @@ export default function App() {
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans antialiased" id="main-scaffold">
       
       {/* 1. Header Hero Panel */}
-      <header className="bg-gradient-to-br from-slate-900 via-[#0e1726] to-[#040810] text-white border-b border-slate-800 shadow-md relative overflow-hidden" id="dashboard-header">
+      <header className="bg-gradient-to-br from-slate-900 via-[#0e1726] to-[#040810] text-white border-b border-slate-805 shadow-md relative overflow-hidden" id="dashboard-header">
         <div className="absolute inset-0 bg-radial-gradient(ellipse_at_top,rgba(30,41,59,0.5),rgba(3,7,18,0.9))"></div>
         
         {/* Decorative Green-White-Green Stripe top edge (Nigerian identity) */}
@@ -236,6 +241,58 @@ export default function App() {
           <div className="bg-emerald-600 h-full flex-grow"></div>
           <div className="bg-white h-full w-[15%] max-w-[100px]"></div>
           <div className="bg-emerald-600 h-full flex-grow"></div>
+        </div>
+
+        {/* Global Navigation Header & Logo */}
+        <div className="border-b border-slate-800/60 relative z-20 bg-slate-950/50 backdrop-blur-xs">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+            {/* Elegant Brand Logo */}
+            <button 
+              onClick={() => setActiveTab('calculator')}
+              className="flex items-center gap-2.5 group cursor-pointer focus:outline-hidden text-left"
+              id="global-brand-logo"
+            >
+              <div className="p-1.5 bg-gradient-to-br from-amber-400 to-amber-600 rounded-lg text-slate-950 font-bold ring-2 ring-amber-500/20 shadow-xs transition-transform group-hover:scale-105 duration-200">
+                <Zap className="h-4 w-4 fill-amber-200 text-slate-950" />
+              </div>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
+                <span className="font-sans font-extrabold tracking-tight text-white text-sm sm:text-base leading-none">
+                  Naija<span className="text-amber-400">Solar</span>Sizer
+                </span>
+                <span className="text-[9px] font-mono text-emerald-400 uppercase tracking-widest font-semibold block sm:inline-block border sm:border-emerald-500/20 sm:px-1.5 sm:py-0.5 rounded-sm sm:bg-emerald-500/5 mt-0.5 sm:mt-0 leading-none">
+                  Specialist
+                </span>
+              </div>
+            </button>
+
+            {/* Navigation Menu */}
+            <nav className="flex items-center gap-1.5 sm:gap-3 font-sans text-xs sm:text-sm">
+              <button
+                onClick={() => setActiveTab('calculator')}
+                className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
+                  activeTab === 'calculator'
+                    ? 'bg-amber-500 text-slate-950 shadow-sm'
+                    : 'text-slate-300 hover:text-white hover:bg-slate-800/40'
+                }`}
+                id="tab-sizer-toggle"
+              >
+                Calculator
+              </button>
+              <button
+                onClick={() => setActiveTab('contact')}
+                className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                  activeTab === 'contact'
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'text-slate-300 hover:text-white hover:bg-slate-800/40'
+                }`}
+                id="tab-contact-toggle"
+              >
+                <MessageSquare className="h-3.5 w-3.5" />
+                <span className="hidden xs:inline">Contact Specialists</span>
+                <span className="xs:hidden">Contact</span>
+              </button>
+            </nav>
+          </div>
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
@@ -279,8 +336,17 @@ export default function App() {
         </div>
       </header>
 
-      {/* Main Body Grid */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" id="calculator-workspace">
+      {/* Main Content Area Toggle */}
+      {activeTab === 'contact' ? (
+        <ContactPage 
+          sizingResult={sizingResult}
+          selectedCityName={settings.selectedCityName}
+          systemVoltage={settings.systemVoltage}
+          batteryChemistry={settings.batteryChemistry}
+          onBackToCalculator={() => setActiveTab('calculator')}
+        />
+      ) : (
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" id="calculator-workspace">
         
         {/* Section A: Location select & Custom Settings Deck */}
         <section className="mb-8" id="location-and-parameters-section">
@@ -358,6 +424,11 @@ export default function App() {
                   <option value={400}>400 Watts</option>
                   <option value={450}>450 Watts</option>
                   <option value={550}>550 Watts</option>
+                  <option value={600}>600 Watts</option>
+                  <option value={625}>625 Watts</option>
+                  <option value={650}>650 Watts</option>
+                  <option value={700}>700 Watts</option>
+                  <option value={750}>750 Watts</option>
                 </select>
               </div>
             </div>
@@ -686,19 +757,19 @@ export default function App() {
                 </span>
               </div>
               <div>
-                <span className="text-[10px] font-mono text-slate-400 block uppercase">Minimal capacity</span>
+                <span className="text-[10px] font-mono text-slate-400 block uppercase">RECOMMENDED TOTAL BACKUP</span>
                 <strong className="text-2xl font-bold tracking-tight text-slate-950 font-sans">
-                  {sizingResult.totalBatteryAhNeeded.toFixed(0)} Ah
+                  {sizingResult.batteryTotalKwhNeeded.toFixed(2)} kWh
                 </strong>
-                <span className="block text-xs text-slate-500 mt-1">
-                  at System DC Voltage of <strong>{settings.systemVoltage}V</strong>
+                <span className="block text-xs text-emerald-600 font-semibold mt-1">
+                  🔋 {sizingResult.recommendedBatteryUnitLabel}
                 </span>
               </div>
-              <div className="pt-2 border-t border-slate-100 text-xs text-emerald-700 font-sans font-medium">
-                ⚡ Sized block: {sizingResult.batteryBankCount}x {sizingResult.singleBatteryAh}Ah modules.
-                <span className="block text-[10px] text-slate-400 font-mono font-normal mt-1">
-                  ({sizingResult.seriesCount} series × {sizingResult.parallelCount} parallel branches)
-                </span>
+              <div className="pt-2 border-t border-slate-100 text-xs text-slate-500 font-sans space-y-1">
+                <p>Minimal capacity: <strong>{sizingResult.totalBatteryAhNeeded.toFixed(0)} Ah</strong> at {settings.systemVoltage}V DC.</p>
+                <p className="text-[10px] text-slate-400 font-mono">
+                  Equivalent to {sizingResult.seriesCount} series × {sizingResult.parallelCount} parallel blocks of standard {sizingResult.singleBatteryAh}Ah deep-cycle module.
+                </p>
               </div>
             </div>
 
@@ -913,6 +984,7 @@ export default function App() {
         </section>
 
       </main>
+      )}
 
       {/* Footer system footer */}
       <footer className="bg-slate-950 border-t border-slate-800 text-slate-400 text-xs py-8 mt-12 text-center" id="app-footer">
@@ -921,6 +993,26 @@ export default function App() {
           <p className="text-[10px]">Verify details with a certified Solar Installer in Nigeria before implementing custom physical installations.</p>
         </div>
       </footer>
+
+      {/* Floating WhatsApp Contact Sticker */}
+      <a 
+        href="https://wa.me/2349071467060"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 z-50 bg-[#25D366] text-white hover:bg-[#20ba5a] p-3 sm:p-4 rounded-full shadow-2xl transition-all duration-300 transform hover:scale-110 flex items-center gap-2.5 group border border-emerald-400/20"
+        id="whatsapp-floating-sticker"
+        title="Chat on WhatsApp"
+        aria-label="Chat with us on WhatsApp"
+      >
+        <span className="relative flex h-2 w-2">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-80"></span>
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+        </span>
+        <MessageSquare className="h-5 w-5 fill-white text-[#25D366]" />
+        <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300 ease-in-out font-sans font-extrabold text-xs sm:text-sm whitespace-nowrap">
+          Chat with Specialist
+        </span>
+      </a>
 
     </div>
   );
