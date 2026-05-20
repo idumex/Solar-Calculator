@@ -1,0 +1,6 @@
+{
+  "name": "Nigeria Solar Sizing Calculator",
+  "description": "Calculate solar system sizing, required panel counts, battery banks, inverters, and cable ratings for any city in Nigeria.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
